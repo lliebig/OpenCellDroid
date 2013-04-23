@@ -1,8 +1,9 @@
-package com.example.opencelldroid;
+package de.opencelldroid;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import de.opencelldroid.R;
 
 public class MainActivity extends Activity {
 
