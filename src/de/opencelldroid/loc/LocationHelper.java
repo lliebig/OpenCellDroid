@@ -87,7 +87,7 @@ public class LocationHelper {
 	 * @param gpsLocListener the {@link LocationListener} that is called on location changes
 	 * @throws ProviderException in case the GPS provider is not available
 	 * @throws Exception in case the location service ins not available
-	 * @returns locMan a reference to the {@link LocationManager} for removing updates
+	 * @returns locMan a reference to the {@link LocationManager}
 	 */
 	public static LocationManager requestGpsLocation(final Context context, final LocationListener gpsLocListener) throws ProviderException, Exception{
 		LocationManager locMan = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);

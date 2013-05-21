@@ -3,7 +3,6 @@ package de.opencelldroid;
 import android.app.Activity;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -16,7 +15,6 @@ public class MainActivity extends Activity implements OnClickListener{
 	
 	private static final String TAG = "OpenCellDroid";
 	
-	private LocationManager mLocMan;
 	private GpsListener mGpsListener;
 	private Location mCurrentLocation;
 
@@ -53,7 +51,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			
 			try {
 				//FIXME: Timeout???
-				mLocMan = LocationHelper.requestGpsLocation(this, mGpsListener);
+				LocationHelper.requestGpsLocation(this, mGpsListener);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
