@@ -13,13 +13,17 @@
         android:id="@+id/btn_main_submit_cell"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/button_submit_cell" />
+        android:text="@string/button_submit_cell"
+        android:onClick="onClick"
+        />
 
     <Button
         android:id="@+id/btn_main_show_cells"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/button_show_cells" />
+        android:text="@string/button_show_cells"
+        android:onClick="onClick"
+        />
 
 </LinearLayout>
 
