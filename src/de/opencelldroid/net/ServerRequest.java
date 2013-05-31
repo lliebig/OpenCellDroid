@@ -26,7 +26,7 @@ import android.util.Log;
  * Communication with the opencellid.org server.
  * For more information see: http://www.opencellid.org/api
  * 
- * @author Tunnel1337
+ * @author Jose Martinez Gonzalez (Tunnel1337)
  */
 public class ServerRequest {
 	
