@@ -18,7 +18,7 @@ import android.util.Log;
  */
 public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 
-	private static final String TAG = "DownloadAndParseXmlTask";
+	private static final String TAG = "DownloadXmlTask";
 	
 	private InputStream inputStream = null;
 	private InputStreamReader inputStreamReader = null;
