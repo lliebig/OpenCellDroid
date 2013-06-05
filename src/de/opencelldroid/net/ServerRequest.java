@@ -26,6 +26,7 @@ import android.util.Log;
  */
 public class ServerRequest {
 	
+	// Class variables
 	private static final String TAG = "ServerRequest";
 	private Context context = null;
 	private AsyncTask <String, Void, String> downloadXml = null;
@@ -37,8 +38,8 @@ public class ServerRequest {
 	
 	// Server test mode option
 	private boolean testMode = false;
-	private int mcc = 1;
-	private int mnc = 1;
+	private int mcc = 1; // 1 for test mode
+	private int mnc = 1; // 1 for test mode
 	
 	// Possible server responses
 	public final int NOT_OK = 0;
