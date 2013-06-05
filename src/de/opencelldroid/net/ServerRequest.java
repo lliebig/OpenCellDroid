@@ -1,21 +1,16 @@
 package de.opencelldroid.net;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.StringReader;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -134,6 +129,42 @@ public class ServerRequest {
 			Log.e (TAG, "Time out while connecting to server.");
 			return NOT_OK;
 		}
+		
+		try {
+			XmlPullParserFactory xmlPullParserFactory = XmlPullParserFactory.newInstance ();
+			xmlPullParserFactory.setNamespaceAware(true);
+			XmlPullParser xmlPullParser = xmlPullParserFactory.newPullParser ();
+			xmlPullParser.setInput (new StringReader (xml));
+			
+			int eventType = xmlPullParser.getEventType();
+			while (eventType != XmlPullParser.END_DOCUMENT) {
+				
+				switch (eventType) {
+				case XmlPullParser.START_DOCUMENT:
+					Log.d (TAG, "Start to read XML");
+					break;
+				case XmlPullParser.START_TAG:
+					Log.d (TAG, "Tag found: " + xmlPullParser.getName());
+					break;
+				case XmlPullParser.TEXT:
+					Log.d (TAG, "Text found: " + xmlPullParser.getText());
+					break;
+				case XmlPullParser.END_TAG:
+					Log.d (TAG, "Tag closed: " + xmlPullParser.getName());
+					break;
+				}
+				
+				eventType = xmlPullParser.next();
+			}
+			Log.d (TAG, "XML ends here");
+		}
+		catch (XmlPullParserException e){
+			Log.e (TAG, "XML parsing gone wrong");
+		}
+		catch (IOException e) {
+			Log.e (TAG, "XML reading gone wrong");
+		}
+
 		
 		return NOT_OK;
 	}
@@ -315,41 +346,6 @@ public class ServerRequest {
 	 */
 	public void cancel () {
 		downloadXml.cancel(true);
-	}
-	
-	/**
-	 * Parse XML to a DOM
-	 * 
-	 * @param xml
-	 * 		The XML reference as String
-	 * @return
-	 * 		XML DOM
-	 */
-	private Document parseXml (final String xml) {
-		Document document = null;
-		
-		try {
-			InputStream inputStream = new ByteArrayInputStream (xml.getBytes ("UTF-8"));
-			DocumentBuilder builder = DocumentBuilderFactory.newInstance ().newDocumentBuilder ();
-			document = builder.parse (inputStream);
-		}
-		catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return null;
-		}
-		catch (ParserConfigurationException e) {
-			e.printStackTrace();
-			return null;
-		}
-		catch (SAXException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-		
-		return document;
 	}
 	
 }
