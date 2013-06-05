@@ -5,24 +5,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.util.Log;
 
 /**
@@ -33,15 +31,14 @@ import android.util.Log;
  */
 public class ServerRequest {
 	
-	private final String TAG = "ServerRequest";
+	private static final String TAG = "ServerRequest";
 	private Context context = null;
+	private AsyncTask <String, Void, String> downloadXml = null;
+	private final int MAX_RESPONSE_TIME_IN_SEC = 10;
 	
 	// OpenCellID data
 	private String apiKey = "";
 	private final String SERVER_URL = "http://www.opencellid.org/";
-	
-	// Server connection
-	private final HttpClient httpClient = new DefaultHttpClient ();
 	
 	// Server test mode option
 	private boolean testMode = false;
@@ -89,7 +86,7 @@ public class ServerRequest {
 	 * @param lon
 	 * 		Longitude of the cell
 	 * @return
-	 * 		OK if cell got successfully added, NOT_OK if cell could not get added
+	 * 		OK, if cell got successfully added; NOT_OK otherwise
 	 */
 	public int addCell (int mcc, int mnc, int lac, int cellId, float lat, float lon) {
 		
@@ -106,7 +103,7 @@ public class ServerRequest {
 			this.mnc = mnc;
 		}
 		
-		final String uri = SERVER_URL
+		final String url = SERVER_URL
 				+ "measure/add?"
 				+ "key=" + this.apiKey
 				+ "&mnc=" + Integer.toString(this.mnc)
@@ -116,23 +113,28 @@ public class ServerRequest {
 				+ "&lat=" + Float.toString(lat)
 				+ "&lon=" + Float.toString(lon);
 		
-		final String xml = getXmlContent (uri);
+		downloadXml = new DownloadXmlTask ().execute (url);
 		
-		Document document = null;
-		if (xml != null) {
-			document = parseXml (xml);
+		String xml = null;
+		try {
+			xml = downloadXml.get (MAX_RESPONSE_TIME_IN_SEC, TimeUnit.SECONDS);
 		}
-		else {
+		catch (CancellationException e) {
+			Log.d (TAG, "Server Request was cancelled.");
+			return NOT_OK;
+		}
+		catch (InterruptedException e) {
+			Log.wtf (TAG, "Thread error while downloading XML");
+		}
+		catch (ExecutionException e) {
+			Log.e (TAG, "Exception: " + e.getCause());
+			return NOT_OK;
+		}
+		catch (TimeoutException e) {
+			Log.e (TAG, "Time out while connecting to server.");
 			return NOT_OK;
 		}
 		
-		if (document != null) {
-			// TODO: Return XML values
-		}
-		else {
-			return NOT_OK;
-		}
-
 		return NOT_OK;
 	}
 	
@@ -307,54 +309,12 @@ public class ServerRequest {
 			return false;
 		}
 	}
-
+	
 	/**
-	 * Save the XML response from opencellid.org in a String
-	 * 
-	 * @param uri
-	 * 		The URI which points to the XML content
-	 * @return
-	 * 		String which contains XML
+	 * Cancel server request
 	 */
-	private String getXmlContent (final String uri) {
-		HttpResponse response = null;
-		
-		try {
-			final HttpGet connection = new HttpGet (uri);
-			response = httpClient.execute (connection);
-			
-			StatusLine statusLine = response.getStatusLine ();
-			if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-				return response.getEntity().getContent().toString();
-			}
-			else {
-				Log.e (TAG, "Could not connect to server");
-				return null;
-			}
-		}
-		catch (IllegalArgumentException e) {
-			e.printStackTrace();
-			return null;
-		}
-		catch (ClientProtocolException e) {
-			e.printStackTrace();
-			return null;
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-		finally {
-			try {
-				response.getEntity().getContent().close();
-			}
-			catch (IllegalStateException e) {
-				e.printStackTrace();
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+	public void cancel () {
+		downloadXml.cancel(true);
 	}
 	
 	/**
