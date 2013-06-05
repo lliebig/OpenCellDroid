@@ -20,6 +20,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 /**
@@ -31,6 +34,7 @@ import android.util.Log;
 public class ServerRequest {
 	
 	private final String TAG = "ServerRequest";
+	private Context context = null;
 	
 	// OpenCellID data
 	private String apiKey = "";
@@ -57,8 +61,9 @@ public class ServerRequest {
 	 * @param testMode
 	 * 		If true, only test requests will be send to the opencellid.org server
 	 */
-	public ServerRequest (String apiKey, boolean testMode) {
+	public ServerRequest (String apiKey, Context context, boolean testMode) {
 		this.apiKey = apiKey;
+		this.context = context;
 		
 		if (testMode) {
 			this.testMode = true;
@@ -87,6 +92,11 @@ public class ServerRequest {
 	 * 		OK if cell got successfully added, NOT_OK if cell could not get added
 	 */
 	public int addCell (int mcc, int mnc, int lac, int cellId, float lat, float lon) {
+		
+		if (!hasInternetConnection()) {
+			return NOT_OK;
+		}
+		
 		if (this.testMode) {
 			this.mcc = 1;
 			this.mnc = 1;
@@ -142,6 +152,10 @@ public class ServerRequest {
 	 */
 	public Object getCell (int mcc, int mnc, int lac, int cellId) {
 		
+		if (!hasInternetConnection()) {
+			return NOT_OK;
+		}
+		
 		if (this.testMode) {
 			this.mcc = 1;
 			this.mnc = 1;
@@ -168,9 +182,13 @@ public class ServerRequest {
 	 * @param cellId
 	 * 		The cell ID
 	 * @return
-	 * 		An array of cells, where only the latitude and longitude is different
+	 * 		An array of the same cell with different latitude and longitude positions
 	 */
 	public Object[] getMeasures (int mcc, int mnc, int lac, int cellId) {
+		
+		if (!hasInternetConnection()) {
+			return null;
+		}
 		
 		if (this.testMode) {
 			this.mcc = 1;
@@ -203,6 +221,10 @@ public class ServerRequest {
 	 * 		An array of cells
 	 */
 	public Object[] getInArea (float[] bbox, int limit, int mcc, int mnc, String fmt) {
+		
+		if (!hasInternetConnection()) {
+			return null;
+		}
 		
 		if (limit <= 0 || limit > 200) {
 			limit = 200;
@@ -240,23 +262,50 @@ public class ServerRequest {
 	 * @param id
 	 * 		The id of the cell that shall get deleted. To get the id use the list method.
 	 */
-	public void deleteCell (int id) {
+	public boolean deleteCell (int id) {
+		
+		if (!hasInternetConnection()) {
+			return false;
+		}
 		
 		// TODO: Implement the method
 		
+		return false;
 	}
 	
 	/**
-	 * Returns all cells which have been submitted yet by OpenCellDroid (this app)
+	 * Return all cells which have been submitted yet by OpenCellDroid (this app)
 	 * 
 	 * @return
 	 * 		An array of cells
 	 */
 	public Object[] listCells () {
 		
+		if (!hasInternetConnection()) {
+			return null;
+		}
+		
 		// TODO: Implement the method
 		
 		return null;
+	}
+	
+	/**
+	 * Check if the device can connect to the Internet
+	 * 
+	 * @return
+	 * 		true, if the device can connect to the Internet; false otherwise
+	 */
+	private boolean hasInternetConnection () {
+		ConnectivityManager connMgr = (ConnectivityManager) this.context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+		if (networkInfo != null && networkInfo.isConnected()) {
+			return true;
+		}
+		else {
+			Log.w (TAG, "No Internet connection available");
+			return false;
+		}
 	}
 
 	/**
