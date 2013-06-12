@@ -1,17 +1,8 @@
 package de.opencelldroid.net;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.List;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
+import de.opencelldroid.loc.Cell;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -29,8 +20,8 @@ public class ServerRequest {
 	// Class variables
 	private static final String TAG = "ServerRequest";
 	private Context context = null;
+	private ServerCallback callingInstance = null;
 	private AsyncTask <String, Void, String> downloadXml = null;
-	private final int MAX_RESPONSE_TIME_IN_SEC = 10;
 	
 	// OpenCellID data
 	private String apiKey = "";
@@ -42,8 +33,10 @@ public class ServerRequest {
 	private int mnc = 1; // 1 for test mode
 	
 	// Possible server responses
-	public final int NOT_OK = 0;
-	public final int OK = 1;
+	 public enum ResponseCode {
+		 NOT_OK,
+		 OK
+	}
 	
 	
 	/**
@@ -54,9 +47,10 @@ public class ServerRequest {
 	 * @param testMode
 	 * 		If true, only test requests will be send to the opencellid.org server
 	 */
-	public ServerRequest (String apiKey, Context context, boolean testMode) {
+	public ServerRequest(String apiKey, Context context, ServerCallback callingInstance, boolean testMode) {
 		this.apiKey = apiKey;
 		this.context = context;
+		this.callingInstance = callingInstance;
 		
 		if (testMode) {
 			this.testMode = true;
@@ -64,6 +58,18 @@ public class ServerRequest {
 		else {
 			this.testMode = false;
 		}
+	}
+	
+	/**
+	 * Only used to get a reference for the callback
+	 * 
+	 * @param apiKey
+	 * 		The API Key from apikey.xml
+	 * @param testMode
+	 * 		If true, only test requests will be send to the opencellid.org server
+	 */
+	public ServerRequest() {
+		this.testMode = true;
 	}
 	
 	/**
@@ -84,10 +90,10 @@ public class ServerRequest {
 	 * @return
 	 * 		OK, if cell got successfully added; NOT_OK otherwise
 	 */
-	public int addCell (int mcc, int mnc, int lac, int cellId, float lat, float lon) {
-		
+	public void addCell(int mcc, int mnc, int lac, int cellId, float lat, float lon) {
 		if (!hasInternetConnection()) {
-			return NOT_OK;
+			Log.w(TAG, "No Internet connection available");
+			return;
 		}
 		
 		if (this.testMode) {
@@ -102,72 +108,21 @@ public class ServerRequest {
 		final String url = SERVER_URL
 				+ "measure/add?"
 				+ "key=" + this.apiKey
-				+ "&mnc=" + Integer.toString(this.mnc)
-				+ "&mcc=" + Integer.toString(this.mcc)
-				+ "&lac=" + Integer.toString(lac)
-				+ "&cellid=" + Integer.toString(cellId)
-				+ "&lat=" + Float.toString(lat)
-				+ "&lon=" + Float.toString(lon);
+				+ "&mnc=" + this.mnc
+				+ "&mcc=" + this.mcc
+				+ "&lac=" + lac
+				+ "&cellid=" + cellId
+				+ "&lat=" + lat
+				+ "&lon=" + lon;
 		
-		downloadXml = new DownloadXmlTask ().execute (url);
+		Log.d(TAG, "Add cell...\n" +
+				"Internet connection OK\n" +
+				"Test mode: " + this.testMode + "\n" +
+				"URL: " + url);
 		
-		String xml = null;
-		try {
-			xml = downloadXml.get (MAX_RESPONSE_TIME_IN_SEC, TimeUnit.SECONDS);
-		}
-		catch (CancellationException e) {
-			Log.d (TAG, "Server Request was cancelled.");
-			return NOT_OK;
-		}
-		catch (InterruptedException e) {
-			Log.wtf (TAG, "Thread error while downloading XML");
-		}
-		catch (ExecutionException e) {
-			Log.e (TAG, "Exception: " + e.getCause());
-			return NOT_OK;
-		}
-		catch (TimeoutException e) {
-			Log.e (TAG, "Time out while connecting to server.");
-			return NOT_OK;
-		}
+		downloadXml = new DownloadXmlTask().execute (url);
 		
-		try {
-			XmlPullParserFactory xmlPullParserFactory = XmlPullParserFactory.newInstance ();
-			xmlPullParserFactory.setNamespaceAware(true);
-			XmlPullParser xmlPullParser = xmlPullParserFactory.newPullParser ();
-			xmlPullParser.setInput (new StringReader (xml));
-			
-			int eventType = xmlPullParser.getEventType();
-			while (eventType != XmlPullParser.END_DOCUMENT) {
-				
-				switch (eventType) {
-				case XmlPullParser.START_DOCUMENT:
-					Log.d (TAG, "Start to read XML");
-					break;
-				case XmlPullParser.START_TAG:
-					Log.d (TAG, "Tag found: " + xmlPullParser.getName());
-					break;
-				case XmlPullParser.TEXT:
-					Log.d (TAG, "Text found: " + xmlPullParser.getText());
-					break;
-				case XmlPullParser.END_TAG:
-					Log.d (TAG, "Tag closed: " + xmlPullParser.getName());
-					break;
-				}
-				
-				eventType = xmlPullParser.next();
-			}
-			Log.d (TAG, "XML ends here");
-		}
-		catch (XmlPullParserException e){
-			Log.e (TAG, "XML parsing gone wrong");
-		}
-		catch (IOException e) {
-			Log.e (TAG, "XML reading gone wrong");
-		}
-
-		
-		return NOT_OK;
+		return;
 	}
 	
 	/**
@@ -184,25 +139,25 @@ public class ServerRequest {
 	 * @return
 	 * 		A single cell object.
 	 */
-	public Object getCell (int mcc, int mnc, int lac, int cellId) {
-		
-		if (!hasInternetConnection()) {
-			return NOT_OK;
-		}
-		
-		if (this.testMode) {
-			this.mcc = 1;
-			this.mnc = 1;
-		}
-		else {
-			this.mcc = mcc;
-			this.mnc = mnc;
-		}
-		
-		// TODO: Implement method to get latitude and longitude
-		
-		return null;
-	}
+//	public ResponseCode getCell(int mcc, int mnc, int lac, int cellId) {
+//		
+//		if (!hasInternetConnection()) {
+//			return ResponseCode.NOT_OK;
+//		}
+//		
+//		if (this.testMode) {
+//			this.mcc = 1;
+//			this.mnc = 1;
+//		}
+//		else {
+//			this.mcc = mcc;
+//			this.mnc = mnc;
+//		}
+//		
+//		// TODO: Implement method to get latitude and longitude
+//		
+//		return ResponseCode.NOT_OK;
+//	}
 	
 	/**
 	 * Get all measure information from a specific cell
@@ -218,25 +173,25 @@ public class ServerRequest {
 	 * @return
 	 * 		An array of the same cell with different latitude and longitude positions
 	 */
-	public Object[] getMeasures (int mcc, int mnc, int lac, int cellId) {
-		
-		if (!hasInternetConnection()) {
-			return null;
-		}
-		
-		if (this.testMode) {
-			this.mcc = 1;
-			this.mnc = 1;
-		}
-		else {
-			this.mcc = mcc;
-			this.mnc = mnc;
-		}
-		
-		// TODO: Implement the method
-		
-		return null;
-	}
+//	public ResponseCode getMeasures(int mcc, int mnc, int lac, int cellId) {
+//		
+//		if (!hasInternetConnection()) {
+//			return ResponseCode.NOT_OK;
+//		}
+//		
+//		if (this.testMode) {
+//			this.mcc = 1;
+//			this.mnc = 1;
+//		}
+//		else {
+//			this.mcc = mcc;
+//			this.mnc = mnc;
+//		}
+//		
+//		// TODO: Implement the method
+//		
+//		return ResponseCode.NOT_OK;
+//	}
 	
 	/**
 	 * Get a list of cells in a specified area
@@ -254,10 +209,10 @@ public class ServerRequest {
 	 * @return
 	 * 		An array of cells
 	 */
-	public Object[] getInArea (float[] bbox, int limit, int mcc, int mnc, String fmt) {
+	public void getInArea(float[] bbox, int limit, int mcc, int mnc, String fmt) {
 		
 		if (!hasInternetConnection()) {
-			return null;
+			return;
 		}
 		
 		if (limit <= 0 || limit > 200) {
@@ -275,20 +230,22 @@ public class ServerRequest {
 		
 		// TODO: Implement the method
 		
-		return null;
+		return;
 	}
 	
 	/**
 	 * Submits multiple cell measurements
 	 * 
-	 * @param datafile
+	 * @param csvFile
 	 * 		CSV file which contains all cell measurements
 	 */
-	public void uploadCsv (File datafile) {
-		
-		// TODO: Implement the method
-		
-	}
+//	public ResponseCode uploadCsv(File csvFile) {
+//		
+//		// TODO: Implement the method
+//		
+//		return ResponseCode.NOT_OK;
+//		
+//	}
 	
 	/**
 	 * Delete a cell. Only cells submitted by OpenCellDroid (this app) can get deleted
@@ -296,16 +253,16 @@ public class ServerRequest {
 	 * @param id
 	 * 		The id of the cell that shall get deleted. To get the id use the list method.
 	 */
-	public boolean deleteCell (int id) {
-		
-		if (!hasInternetConnection()) {
-			return false;
-		}
-		
-		// TODO: Implement the method
-		
-		return false;
-	}
+//	public ResponseCode deleteCell(int id) {
+//		
+//		if (!hasInternetConnection()) {
+//			return false;
+//		}
+//		
+//		// TODO: Implement the method
+//		
+//		return ResponseCode.NOT_OK;
+//	}
 	
 	/**
 	 * Return all cells which have been submitted yet by OpenCellDroid (this app)
@@ -313,16 +270,16 @@ public class ServerRequest {
 	 * @return
 	 * 		An array of cells
 	 */
-	public Object[] listCells () {
-		
-		if (!hasInternetConnection()) {
-			return null;
-		}
-		
-		// TODO: Implement the method
-		
-		return null;
-	}
+//	public ResponseCode listCells() {
+//		
+//		if (!hasInternetConnection()) {
+//			return ResponseCode.NOT_OK;
+//		}
+//		
+//		// TODO: Implement the method
+//		
+//		return ResponseCode.NOT_OK;
+//	}
 	
 	/**
 	 * Check if the device can connect to the Internet
@@ -330,23 +287,52 @@ public class ServerRequest {
 	 * @return
 	 * 		true, if the device can connect to the Internet; false otherwise
 	 */
-	private boolean hasInternetConnection () {
+	private boolean hasInternetConnection() {
 		ConnectivityManager connMgr = (ConnectivityManager) this.context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 		if (networkInfo != null && networkInfo.isConnected()) {
 			return true;
 		}
 		else {
-			Log.w (TAG, "No Internet connection available");
 			return false;
 		}
 	}
 	
 	/**
-	 * Cancel server request
+	 * Cancels current server request
 	 */
-	public void cancel () {
+	public void cancel() {
 		downloadXml.cancel(true);
+	}
+	
+	/**
+	 * Will get called when {@link DownloadXmlTask} is done to add a cell
+	 * 
+	 * @param originalMethod
+	 * 		The method why downloadXml was called, e. g. addCell
+	 */
+	protected void downloadXmlAddCellCallback(boolean state) {
+		if (state) {
+			this.callingInstance.addCellCallback(ResponseCode.OK);
+		}
+		else {
+			this.callingInstance.addCellCallback(ResponseCode.NOT_OK);
+		}
+	}
+	
+	/**
+	 * Will get called when {@link DownloadXmlTask} is done to get cells in an area
+	 * 
+	 * @param originalMethod
+	 * 		The method why downloadXml was called, e. g. addCell
+	 */
+	public void downloadXmlGetInAreaCallback(boolean state, List<Cell> listOfCells) {
+		if (state) {
+			this.callingInstance.getInAreaCallback(ResponseCode.OK, listOfCells);
+		}
+		else {
+			this.callingInstance.getInAreaCallback(ResponseCode.NOT_OK, listOfCells);
+		}
 	}
 	
 }
