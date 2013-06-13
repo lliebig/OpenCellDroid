@@ -51,13 +51,7 @@ public class ServerRequest {
 		this.apiKey = apiKey;
 		this.context = context;
 		this.callingInstance = callingInstance;
-		
-		if (testMode) {
-			this.testMode = true;
-		}
-		else {
-			this.testMode = false;
-		}
+		this.testMode = testMode;
 	}
 	
 	/**
