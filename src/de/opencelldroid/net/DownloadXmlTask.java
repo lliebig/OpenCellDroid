@@ -21,8 +21,12 @@ import android.util.Log;
  * @author Jose Martinez Gonzalez (Tunnel1337)
  */
 public class DownloadXmlTask extends AsyncTask <String, Void, String> {
-
+	
+	// Class variables
 	private static final String TAG = "DownloadXmlTask";
+	private final int TIMEOUT_IN_MILLIS = 10000;
+	
+	// Return values
 	private boolean state = false;
 	private List<Cell> listOfCells = new ArrayList<Cell>();
 	
@@ -47,6 +51,9 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 		catch (IOException e) {
 			Log.w (TAG, "Could not close stream while cancelling.");
 		}
+		catch (NullPointerException e) {
+			Log.d (TAG, "Could not close stream while cancelling.");
+		}
 		finally {
 			Log.d (TAG, "Cancelled server request");
 		}
@@ -62,9 +69,11 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 	@Override
 	protected String doInBackground (String... urls) {
 		try {
+			// Get XML
 			URL url = new URL (urls[0]);
-			
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setReadTimeout(TIMEOUT_IN_MILLIS);
+			connection.setConnectTimeout(TIMEOUT_IN_MILLIS);
 			connection.setRequestMethod ("GET");
 			connection.setDoInput (true);
 			connection.connect();
@@ -87,7 +96,7 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 			
 			// Parse XML
 			XmlParser xmlParser = new XmlParser();
-			String originalMethod = null;
+			String originalMethod = "";
 			if (urls[0].startsWith("http://www.opencellid.org/measure/add?")) {
 				this.state = xmlParser.parseAddCellRequest(xml);
 				originalMethod = this.addCellMethod;
@@ -106,6 +115,9 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 		catch (IOException e) {
 			Log.e (TAG, "Could not connect to server");
 		}
+		catch (IllegalArgumentException e) {
+			Log.wtf (TAG, "Timeout value set wrong. Timeout is: " + TIMEOUT_IN_MILLIS);
+		}
 		finally {
 			try {
 				inputStream.close ();
@@ -114,6 +126,9 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 			}
 			catch (IOException e) {
 				Log.d (TAG, "Could not close stream.");
+			}
+			catch (NullPointerException e) {
+				Log.d (TAG, "No stream to server.");
 			}
 		}
 		

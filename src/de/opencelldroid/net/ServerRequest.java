@@ -326,7 +326,7 @@ public class ServerRequest {
 	 * @param originalMethod
 	 * 		The method why downloadXml was called, e. g. addCell
 	 */
-	public void downloadXmlGetInAreaCallback(boolean state, List<Cell> listOfCells) {
+	protected void downloadXmlGetInAreaCallback(boolean state, List<Cell> listOfCells) {
 		if (state) {
 			this.callingInstance.getInAreaCallback(ResponseCode.OK, listOfCells);
 		}
