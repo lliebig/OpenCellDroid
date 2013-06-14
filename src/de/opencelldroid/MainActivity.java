@@ -14,18 +14,20 @@ import android.view.View.OnClickListener;
 public class MainActivity extends Activity implements OnClickListener, ServerCallback {
 
 	private static final String TAG = "MainActivity";
+	private ServerRequest serverRequest;
 	
 	// Possible server responses
-		public enum ResponseCode {
-			NOT_OK,
-			OK
-		}
-		
+	public enum ResponseCode {
+		NOT_OK,
+		OK
+	}
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		this.serverRequest = new ServerRequest(getString(R.string.opencellid_apikey), getBaseContext(), this, true);
 	}
 	
 	@Override
@@ -44,8 +46,7 @@ public class MainActivity extends Activity implements OnClickListener, ServerCal
 		switch (viewId) {
 		case R.id.btn_main_submit_cell:
 			Log.d (TAG, "Clicked on submit cell");
-			ServerRequest serverRequest = new ServerRequest(getString(R.string.opencellid_apikey), getBaseContext(), this, true);
-			serverRequest.addCell(1, 1, 1, 1, 1.0f, 1.0f);
+			this.serverRequest.addCell(1, 1, 1, 1, 1.0f, 1.0f);
 			break;
 		case R.id.btn_main_show_cells:
 			Log.d (TAG, "Clicked on show cells");

@@ -23,6 +23,11 @@ public class ServerRequest {
 	private ServerCallback callingInstance = null;
 	private AsyncTask <String, Void, String> downloadXml = null;
 	
+	// Methods that can call DownloadXmlTask
+	protected String originalMethod = "";
+	protected final String addCellMethod = "addCell";
+	protected final String getInAreaMethod = "getInArea";
+	
 	// OpenCellID data
 	private String apiKey = "";
 	private final String SERVER_URL = "http://www.opencellid.org/";
@@ -98,6 +103,8 @@ public class ServerRequest {
 			this.mcc = mcc;
 			this.mnc = mnc;
 		}
+		
+		this.originalMethod = this.addCellMethod;
 		
 		final String url = SERVER_URL
 				+ "measure/add?"
@@ -221,6 +228,8 @@ public class ServerRequest {
 			this.mcc = mcc;
 			this.mnc = mnc;
 		}
+		
+		this.originalMethod = this.getInAreaMethod;
 		
 		// TODO: Implement the method
 		

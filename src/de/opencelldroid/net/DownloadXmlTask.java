@@ -35,11 +35,6 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 	private BufferedReader bufferedReader = null;
 	
 	
-	// Methods that gave DownloadXmlTask the task
-	private final String addCellMethod = "addCell";
-	private final String getInAreaMethod = "getInArea";
-	
-	
 	// XML download got cancelled
 	@Override
 	protected void onCancelled () {
@@ -96,18 +91,20 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 			
 			// Parse XML
 			XmlParser xmlParser = new XmlParser();
-			String originalMethod = "";
-			if (urls[0].startsWith("http://www.opencellid.org/measure/add?")) {
+			ServerRequest serverRequest = new ServerRequest();
+			String originalMethod = serverRequest.originalMethod;
+			if (originalMethod.equals(serverRequest.addCellMethod)) {
 				this.state = xmlParser.parseAddCellRequest(xml);
-				originalMethod = this.addCellMethod;
 			}
-			else if (urls[0].startsWith("http://www.opencellid.org/cell/getInArea?")) {
+			else if (originalMethod.equals(serverRequest.getInAreaMethod)) {
 				this.state = true;
 				this.listOfCells = xmlParser.parseGetInAreaRequest(xml);
-				originalMethod = this.getInAreaMethod;
+			}
+			else {
+				Log.e(TAG, "Didn't parse XML because there was no original method set in ServerRequest");
 			}
 			
-			return originalMethod;
+			return xml;
 		}
 		catch (MalformedURLException e) {
 			Log.e (TAG, "Given URL could not get retrieved.");
@@ -140,10 +137,10 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 	protected void onPostExecute (String originalMethod) {
 		ServerRequest serverRequest = new ServerRequest();
 		
-		if (originalMethod.equals(this.addCellMethod)) {
+		if (serverRequest.originalMethod.equals(serverRequest.addCellMethod)) {
 			serverRequest.downloadXmlAddCellCallback(this.state);
 		}
-		else if (originalMethod.equals(this.getInAreaMethod)) {
+		else if (serverRequest.originalMethod.equals(serverRequest.getInAreaMethod)) {
 			serverRequest.downloadXmlGetInAreaCallback(this.state, this.listOfCells);
 		}
 	}
