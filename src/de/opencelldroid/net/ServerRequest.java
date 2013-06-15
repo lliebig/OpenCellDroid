@@ -24,7 +24,6 @@ public class ServerRequest {
 	private AsyncTask <String, Void, String> downloadXml = null;
 	
 	// Methods that can call DownloadXmlTask
-	protected String originalMethod = "";
 	protected final String addCellMethod = "addCell";
 	protected final String getInAreaMethod = "getInArea";
 	
@@ -67,7 +66,7 @@ public class ServerRequest {
 	 * @param testMode
 	 * 		If true, only test requests will be send to the opencellid.org server
 	 */
-	public ServerRequest() {
+	protected ServerRequest() {
 		this.testMode = true;
 	}
 	
@@ -104,8 +103,6 @@ public class ServerRequest {
 			this.mnc = mnc;
 		}
 		
-		this.originalMethod = this.addCellMethod;
-		
 		final String url = SERVER_URL
 				+ "measure/add?"
 				+ "key=" + this.apiKey
@@ -121,7 +118,7 @@ public class ServerRequest {
 				"Test mode: " + this.testMode + "\n" +
 				"URL: " + url);
 		
-		downloadXml = new DownloadXmlTask().execute (url);
+		downloadXml = new DownloadXmlTask().execute (url, this.addCellMethod);
 		
 		return;
 	}
@@ -228,8 +225,6 @@ public class ServerRequest {
 			this.mcc = mcc;
 			this.mnc = mnc;
 		}
-		
-		this.originalMethod = this.getInAreaMethod;
 		
 		// TODO: Implement the method
 		

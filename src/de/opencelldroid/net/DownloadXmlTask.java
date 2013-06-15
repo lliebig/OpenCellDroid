@@ -25,6 +25,7 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 	// Class variables
 	private static final String TAG = "DownloadXmlTask";
 	private final int TIMEOUT_IN_MILLIS = 10000;
+	private String originalMethod = "";
 	
 	// Return values
 	private boolean state = false;
@@ -37,7 +38,7 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 	
 	// XML download got cancelled
 	@Override
-	protected void onCancelled () {
+	protected void onCancelled() {
 		try {
 			inputStream.close ();
 			inputStreamReader.close ();
@@ -50,7 +51,7 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 			Log.d (TAG, "Could not close stream while cancelling.");
 		}
 		finally {
-			Log.d (TAG, "Cancelled server request");
+			Log.d(TAG, "Cancelled server request");
 		}
 	}
 	
@@ -62,28 +63,29 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 	
 	// Download XML without blocking the UI
 	@Override
-	protected String doInBackground (String... urls) {
+	protected String doInBackground(String... urls) {
 		try {
 			// Get XML
-			URL url = new URL (urls[0]);
+			URL url = new URL(urls[0]);
+			this.originalMethod = urls[1];
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setReadTimeout(TIMEOUT_IN_MILLIS);
 			connection.setConnectTimeout(TIMEOUT_IN_MILLIS);
-			connection.setRequestMethod ("GET");
-			connection.setDoInput (true);
+			connection.setRequestMethod("GET");
+			connection.setDoInput(true);
 			connection.connect();
 			
-			inputStream = connection.getInputStream();
+			this.inputStream = connection.getInputStream();
 
 			// Convert InputStream to String
-			inputStreamReader = new InputStreamReader (inputStream);
-			bufferedReader = new BufferedReader (inputStreamReader);
+			this.inputStreamReader = new InputStreamReader(this.inputStream);
+			this.bufferedReader = new BufferedReader(this.inputStreamReader);
 			
-			StringBuilder stringBuilder = new StringBuilder ();
-			String nextLine = bufferedReader.readLine ();
+			StringBuilder stringBuilder = new StringBuilder();
+			String nextLine = this.bufferedReader.readLine();
 			while (nextLine != null) {
 				stringBuilder.append (nextLine);
-				nextLine = bufferedReader.readLine ();
+				nextLine = this.bufferedReader.readLine();
 			}
 			
 			String xml = stringBuilder.toString();
@@ -92,7 +94,6 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 			// Parse XML
 			XmlParser xmlParser = new XmlParser();
 			ServerRequest serverRequest = new ServerRequest();
-			String originalMethod = serverRequest.originalMethod;
 			if (originalMethod.equals(serverRequest.addCellMethod)) {
 				this.state = xmlParser.parseAddCellRequest(xml);
 			}
@@ -107,25 +108,25 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 			return xml;
 		}
 		catch (MalformedURLException e) {
-			Log.e (TAG, "Given URL could not get retrieved.");
+			Log.e(TAG, "Given URL could not get retrieved.");
 		}
 		catch (IOException e) {
-			Log.e (TAG, "Could not connect to server");
+			Log.e(TAG, "Could not connect to server");
 		}
 		catch (IllegalArgumentException e) {
-			Log.wtf (TAG, "Timeout value set wrong. Timeout is: " + TIMEOUT_IN_MILLIS);
+			Log.wtf(TAG, "Timeout value set wrong. Timeout was set to: " + TIMEOUT_IN_MILLIS);
 		}
 		finally {
 			try {
-				inputStream.close ();
-				inputStreamReader.close ();
-				bufferedReader.close ();
+				inputStream.close();
+				inputStreamReader.close();
+				bufferedReader.close();
 			}
 			catch (IOException e) {
-				Log.d (TAG, "Could not close stream.");
+				Log.d(TAG, "Could not close stream.");
 			}
 			catch (NullPointerException e) {
-				Log.d (TAG, "No stream to server.");
+				Log.d(TAG, "No stream to server.");
 			}
 		}
 		
@@ -134,13 +135,14 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 	
 	// When XML is fully loaded
 	@Override
-	protected void onPostExecute (String originalMethod) {
+	protected void onPostExecute(String originalMethod) {
 		ServerRequest serverRequest = new ServerRequest();
-		
-		if (serverRequest.originalMethod.equals(serverRequest.addCellMethod)) {
+		if (this.originalMethod.equals(serverRequest.addCellMethod)) {
+			Log.d(TAG, "Callback to " + serverRequest.addCellMethod+ " method with status: " + this.state);
 			serverRequest.downloadXmlAddCellCallback(this.state);
 		}
-		else if (serverRequest.originalMethod.equals(serverRequest.getInAreaMethod)) {
+		else if (this.originalMethod.equals(serverRequest.getInAreaMethod)) {
+			Log.d(TAG, "Callback to " + serverRequest.getInAreaMethod + " method with status: " + this.state);
 			serverRequest.downloadXmlGetInAreaCallback(this.state, this.listOfCells);
 		}
 	}
