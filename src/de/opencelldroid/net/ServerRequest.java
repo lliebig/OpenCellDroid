@@ -118,7 +118,7 @@ public class ServerRequest {
 				"Test mode: " + this.testMode + "\n" +
 				"URL: " + url);
 		
-		downloadXml = new DownloadXmlTask().execute (url, this.addCellMethod);
+		downloadXml = new DownloadXmlTask().execute(url, this.addCellMethod);
 		
 		return;
 	}
@@ -202,31 +202,46 @@ public class ServerRequest {
 	 * 		Restrict the result to a specific country. Chose 0 for no restriction.
 	 * @param mnc
 	 * 		Restrict the result to a specific operator. Chose 0 for no restriction.
-	 * @param fmt
-	 * 		Format of the result: KML, XML or TXT. Default is KML. TXT returns a CSV file with the first line as a headline.
 	 * @return
 	 * 		An array of cells
 	 */
-	public void getInArea(float[] bbox, int limit, int mcc, int mnc, String fmt) {
+	public void getInArea(float[] bbox, int limit, int mcc, int mnc) {
 		
 		if (!hasInternetConnection()) {
 			return;
 		}
 		
-		if (limit <= 0 || limit > 200) {
+		if (limit < 0 || limit > 200) {
 			limit = 200;
 		}
 		
-		if (this.testMode) {
-			this.mcc = 1;
-			this.mnc = 1;
+		String theMcc = "";
+		if(mcc != 0) {
+			theMcc = Integer.toString(mcc);
 		}
-		else {
-			this.mcc = mcc;
-			this.mnc = mnc;
+
+		String theMnc = "";
+		if(mnc != 0) {
+			theMnc = Integer.toString(mnc);
 		}
 		
-		// TODO: Implement the method
+		final String url = SERVER_URL
+				+ "cell/getInArea?"
+				+ "BBOX="
+					+ bbox[0] + "," // latmin
+					+ bbox[1] + "," // lonmin
+					+ bbox[2] + "," // latmax
+					+ bbox[3] // lonmax
+				+ "&mnc=" + theMnc
+				+ "&mcc=" + theMcc
+				+ "&fmt=xml";
+		
+		Log.d(TAG, "Get in area...\n" +
+				"Internet connection OK\n" +
+				"Test mode: " + this.testMode + "\n" +
+				"URL: " + url);
+		
+		downloadXml = new DownloadXmlTask().execute(url, this.getInAreaMethod);
 		
 		return;
 	}

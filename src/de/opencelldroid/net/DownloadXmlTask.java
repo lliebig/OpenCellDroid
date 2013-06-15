@@ -94,10 +94,10 @@ public class DownloadXmlTask extends AsyncTask <String, Void, String> {
 			// Parse XML
 			XmlParser xmlParser = new XmlParser();
 			ServerRequest serverRequest = new ServerRequest();
-			if (originalMethod.equals(serverRequest.addCellMethod)) {
+			if (this.originalMethod.equals(serverRequest.addCellMethod)) {
 				this.state = xmlParser.parseAddCellRequest(xml);
 			}
-			else if (originalMethod.equals(serverRequest.getInAreaMethod)) {
+			else if (this.originalMethod.equals(serverRequest.getInAreaMethod)) {
 				this.state = true;
 				this.listOfCells = xmlParser.parseGetInAreaRequest(xml);
 			}

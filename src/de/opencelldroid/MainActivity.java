@@ -50,6 +50,8 @@ public class MainActivity extends Activity implements OnClickListener, ServerCal
 			break;
 		case R.id.btn_main_show_cells:
 			Log.d (TAG, "Clicked on show cells");
+			float[] bbox = {0.0f, 0.0f, 1000.0f, 1000.0f};
+			this.serverRequest.getInArea(bbox, 200, 0, 0);
 			break;
 		default:
 			Log.w (TAG, "No case for this button");
