@@ -15,21 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenCellDroid.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.opencelldroid.net;
+package de.opencelldroid.loc;
 
-import java.util.List;
-
-import de.opencelldroid.loc.Cell;
-import de.opencelldroid.net.ServerRequest.ResponseCode;
+import android.location.Location;
 
 /**
  * Implements callback methods
  * 
- * @author info@leoliebig.de, Jose Martinez Gonzalez (Tunnel1337)
+ * @author info@leoliebig.de
  */
-public interface ServerCallback {
+public interface LocationHelperInterface {
 	
-	public void addCellCallback(ResponseCode code);
-	public void getInAreaCallback(ResponseCode code, List<Cell> cells);
-	
+	public void onGpsFix(Location location);
+	public void onGpsTimeOut();
+
 }

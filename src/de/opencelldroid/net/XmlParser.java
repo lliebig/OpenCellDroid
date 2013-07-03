@@ -1,3 +1,20 @@
+/*
+ * Copyright 2013 Leo Liebig (lliebig, info@leoliebig.de), Dmitrij Ignatjew, Jose Martinez Gonzalez (Tunnel1337)
+ * This file is part of OpenCellDroid.
+ * 
+ * OpenCellDroid is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * OpenCellDroid is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with OpenCellDroid.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.opencelldroid.net;
 
 import java.io.IOException;
@@ -46,9 +63,9 @@ public class XmlParser {
 	 */
 	public boolean parseAddCellRequest(String xml) {
 		// Response strings
-		String state = null;
-		String errorCode = null;
-		String errorInfo = null;
+		String state = "";
+		String errorCode = "";
+		String errorInfo = "";
 		
 		// Parse XML
 		try {
@@ -59,11 +76,11 @@ public class XmlParser {
 			while (eventType != XmlPullParser.END_DOCUMENT) {
 				switch (eventType) {
 				case XmlPullParser.START_DOCUMENT:
-					Log.d(TAG, "Start to read XML");
+//					Log.d(TAG, "Start to read XML");
 					break;
 				case XmlPullParser.START_TAG:
 					String tag = xmlPullParser.getName();
-					Log.d(TAG, "Tag found: " + xmlPullParser.getName());
+//					Log.d(TAG, "Tag found: " + xmlPullParser.getName());
 					
 					if (tag.equals("rsp")) {
 						state = xmlPullParser.getAttributeValue(null, "stat");
@@ -75,18 +92,18 @@ public class XmlParser {
 					
 					break;
 				case XmlPullParser.TEXT:
-					Log.d(TAG, "Text found: " + xmlPullParser.getText());
+//					Log.d(TAG, "Text found: " + xmlPullParser.getText());
 					break;
 				case XmlPullParser.END_TAG:
-					Log.d(TAG, "Tag closed: " + xmlPullParser.getName());
+//					Log.d(TAG, "Tag closed: " + xmlPullParser.getName());
 					break;
 				default:
-					Log.w(TAG, "Not handled XML passage");
+//					Log.w(TAG, "Not handled XML passage");
 					break;
 				}
 				eventType = xmlPullParser.next();
 			}
-			Log.d(TAG, "XML end");
+//			Log.d(TAG, "XML end");
 		}
 		catch (XmlPullParserException e){
 			Log.e(TAG, "XML parsing gone wrong");
@@ -102,7 +119,7 @@ public class XmlParser {
 			return false;
 		}
 		else if (state.equals("ok")){
-			Log.d(TAG, "Cell got successfully added to opencellid.org!");
+			Log.d(TAG, "Cell successfully added to opencellid.org!");
 			return true;
 		}
 		else {
@@ -124,9 +141,9 @@ public class XmlParser {
 		List<Cell> listOfCells = new ArrayList<Cell>();
 		
 		// Response strings
-		String state = null;
-		String errorCode = null;
-		String errorInfo = null;
+		String state = "";
+		String errorCode = "";
+		String errorInfo = "";
 		
 		// Parse XML
 		try {
@@ -137,11 +154,11 @@ public class XmlParser {
 			while (eventType != XmlPullParser.END_DOCUMENT) {
 				switch (eventType) {
 				case XmlPullParser.START_DOCUMENT:
-					Log.d(TAG, "Start to read XML");
+//					Log.d(TAG, "Start to read XML");
 					break;
 				case XmlPullParser.START_TAG:
 					String tag = xmlPullParser.getName();
-					Log.d(TAG, "Tag found: " + xmlPullParser.getName());
+//					Log.d(TAG, "Tag found: " + xmlPullParser.getName());
 					
 					if (tag.equals("rsp")) {
 						state = xmlPullParser.getAttributeValue(null, "stat");
@@ -163,10 +180,10 @@ public class XmlParser {
 					
 					break;
 				case XmlPullParser.TEXT:
-					Log.d(TAG, "Text found: " + xmlPullParser.getText());
+//					Log.d(TAG, "Text found: " + xmlPullParser.getText());
 					break;
 				case XmlPullParser.END_TAG:
-					Log.d(TAG, "Tag closed: " + xmlPullParser.getName());
+//					Log.d(TAG, "Tag closed: " + xmlPullParser.getName());
 					break;
 				default:
 					Log.w(TAG, "Not handled XML passage");
