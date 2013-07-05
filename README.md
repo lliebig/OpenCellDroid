@@ -3,10 +3,10 @@ OpenCellDroid
 
 An OpenCellID client for Android
 
-This client shall help to find all phone cells around the world with their locations.
+This client shall help to find all mobile phone cell towers around the world and their locations.
 <br />The cell information are saved in a public database.
 
-This is an independent project.
+This is an independent project originally started during an Open Data course at the HTW Berlin.
 <br />Fore more information about the OpenCellID project, please visit http://www.opencellid.org
 
 <b>PLEASE NOTE</b>
