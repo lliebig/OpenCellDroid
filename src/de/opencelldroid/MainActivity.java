@@ -95,6 +95,10 @@ public class MainActivity extends Activity implements OnClickListener,
 		super.onResume();
 		Log.d(TAG, "onResume called");
 		if(!DEBUG_MODE && (mCurrentLocation == null || !mLocHelper.gpsFixIsUpToDate(mCurrentLocation)) ) getGpsFix();
+		else{
+			mBtnAddCell.setEnabled(true);
+			mBtnShowInArea.setEnabled(true);
+		}
 	}
 
 	/**

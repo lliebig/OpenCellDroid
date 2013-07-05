@@ -119,9 +119,11 @@ public class MapActivity extends FragmentActivity implements ServerCallback{
 		LatLng currentPosition = new LatLng(i.getDoubleExtra(EXTRA_CUR_LAT,  52.412222222222), i.getDoubleExtra(EXTRA_CUR_LON,  13.3675));
 		moveMapTo(currentPosition, "Your are here");
 		
-		long start = System.currentTimeMillis();
+		/*
+		 * TODO: Parse the data of the CSV into a database  to avoid
+		 * the parsing on each start of this Activity.
+		 */
 		operatorDataMap = CSVParser.getOperatorData(this);
-		Log.d(TAG, "Parsing time: " + (System.currentTimeMillis() - start) + "ms");
 		
 	}
 	
@@ -197,8 +199,6 @@ public class MapActivity extends FragmentActivity implements ServerCallback{
 		mCurrentBoundingBox = mMap.getProjection().getVisibleRegion().latLngBounds;
 		LatLng ne = mCurrentBoundingBox.northeast;
 		LatLng sw = mCurrentBoundingBox.southwest;
-		
-//		Log.d(TAG, "BBox: " + ne.toString() + " | " + sw.toString());
 		
 		if(ne.latitude == 0 && ne.longitude == 0 && sw.latitude == 0 && sw.longitude== 0){
 			Log.e(TAG, "Could not create bounding box from map view!");
