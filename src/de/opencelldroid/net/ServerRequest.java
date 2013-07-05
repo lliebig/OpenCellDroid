@@ -87,20 +87,10 @@ public class ServerRequest {
 	/**
 	 * Submits a new cell measurement
 	 * 
-	 * @param mcc
-	 *            Mobile Country Code
-	 * @param mnc
-	 *            Mobile Network Code
-	 * @param lac
-	 *            Local Area Code
-	 * @param cellId
-	 *            The cell ID
-	 * @param lat
-	 *            Latitude of the cell
-	 * @param lon
-	 *            Longitude of the cell
-	 * @return OK, if cell got successfully added; NOT_OK otherwise
-	 * @throws NetworkErrorException if no internet connection is available
+	 * @param cell
+	 * 		A single cell object
+	 * @throws NetworkErrorException
+	 * 		if no Internet connection is available
 	 */
 	public void addCell(Cell cell) throws NetworkErrorException {
 		if (!hasInternetConnection()) {
@@ -120,11 +110,15 @@ public class ServerRequest {
 				+ "&cellid=" + cell.getCellId() + "&lat=" + cell.getLat() + "&lon=" + cell.getLon();
 
 		Log.d(TAG, "Add cell...\n" + "Internet connection OK\n" + "Test mode: "
-				+ DEBUG_MODE + "\n" + "URL: " + url);
-		//FIXME: add busy flag
-		requestTask = new RequestTask().execute(url, ADD_CELL);
-
-		return;
+				+ DEBUG_MODE);
+		
+		if (requestTask != null &&
+				(requestTask.getStatus() != AsyncTask.Status.PENDING || requestTask.getStatus() != AsyncTask.Status.RUNNING)) {
+			requestTask = new RequestTask().execute(url, ADD_CELL);
+		}
+		else {
+			// nothing
+		}
 	}
 
 	/**
@@ -139,27 +133,21 @@ public class ServerRequest {
 	 *            Local Area Code
 	 * @param cellId
 	 *            The cell ID
-	 * @return A single cell object.
 	 */
-	// public ResponseCode getCell(int mcc, int mnc, int lac, int cellId) {
-	//
-	// if (!hasInternetConnection()) {
-	// return ResponseCode.NOT_OK;
-	// }
-	//
-	// if (this.testMode) {
-	// this.mcc = 1;
-	// this.mnc = 1;
-	// }
-	// else {
-	// this.mcc = mcc;
-	// this.mnc = mnc;
-	// }
-	//
-	// // TODO: Implement method to get latitude and longitude
-	//
-	// return ResponseCode.NOT_OK;
-	// }
+//	 public void getCell(int mcc, int mnc, int lac, int cellId) {
+//		if (!hasInternetConnection()) {
+//			return;
+//		}
+//		
+//		if (this.testMode) {
+//			this.mcc = 1;
+//			this.mnc = 1;
+//		}
+//		else {
+//			this.mcc = mcc;
+//			this.mnc = mnc;
+//		}
+//	 }
 
 	/**
 	 * Get all measure information from a specific cell
@@ -175,25 +163,20 @@ public class ServerRequest {
 	 * @return An array of the same cell with different latitude and longitude
 	 *         positions
 	 */
-	// public ResponseCode getMeasures(int mcc, int mnc, int lac, int cellId) {
-	//
-	// if (!hasInternetConnection()) {
-	// return ResponseCode.NOT_OK;
-	// }
-	//
-	// if (this.testMode) {
-	// this.mcc = 1;
-	// this.mnc = 1;
-	// }
-	// else {
-	// this.mcc = mcc;
-	// this.mnc = mnc;
-	// }
-	//
-	// // TODO: Implement the method
-	//
-	// return ResponseCode.NOT_OK;
-	// }
+//	 public void getMeasures(int mcc, int mnc, int lac, int cellId) {
+//		if (!hasInternetConnection()) {
+//			return;
+//		}
+//		
+//		if (this.testMode) {
+//			this.mcc = 1;
+//			this.mnc = 1;
+//		}
+//		else {
+//			this.mcc = mcc;
+//			this.mnc = mnc;
+//		}
+//	 }
 
 	/**
 	 * Get a list of cells in a specified area
@@ -210,8 +193,8 @@ public class ServerRequest {
 	 * @param mnc
 	 *            Restrict the result to a specific operator. Chose 0 for no
 	 *            restriction.
-	 * @return An array of cells
-	 * @throws NetworkErrorException if no internet connection available
+	 * @throws NetworkErrorException
+	 * 		if no internet connection available
 	 */
 	public void getInArea(double[] bbox, int limit) throws NetworkErrorException {
 		
@@ -236,10 +219,14 @@ public class ServerRequest {
 
 		Log.d(TAG, "Get in area...\n" + "Internet connection OK\n"
 				+ "Test mode: " + DEBUG_MODE + "\n" + "URL: " + url);
-		//FIXME: add busy flag
-		requestTask = new RequestTask().execute(url, GET_IN_AREA);
-
-		return;
+		
+		if (requestTask != null &&
+				(requestTask.getStatus() != AsyncTask.Status.PENDING || requestTask.getStatus() != AsyncTask.Status.RUNNING)) {
+			requestTask = new RequestTask().execute(url, GET_IN_AREA);
+		}
+		else {
+			// nothing
+		}
 	}
 
 	/**
@@ -248,13 +235,9 @@ public class ServerRequest {
 	 * @param csvFile
 	 *            CSV file which contains all cell measurements
 	 */
-	// public ResponseCode uploadCsv(File csvFile) {
-	//
-	// // TODO: Implement the method
-	//
-	// return ResponseCode.NOT_OK;
-	//
-	// }
+//	public void uploadCsv(File csvFile) {
+//		
+//	}
 
 	/**
 	 * Delete a cell. Only cells submitted by OpenCellDroid (this app) can get
@@ -264,33 +247,21 @@ public class ServerRequest {
 	 *            The id of the cell that shall get deleted. To get the id use
 	 *            the list method.
 	 */
-	// public ResponseCode deleteCell(int id) {
-	//
-	// if (!hasInternetConnection()) {
-	// return false;
-	// }
-	//
-	// // TODO: Implement the method
-	//
-	// return ResponseCode.NOT_OK;
-	// }
+//	 public void deleteCell(int id) {
+//		if (!hasInternetConnection()) {
+//			return;
+//		}
+//	 }
 
 	/**
 	 * Return all cells which have been submitted yet by OpenCellDroid (this
 	 * app)
-	 * 
-	 * @return An array of cells
 	 */
-	// public ResponseCode listCells() {
-	//
-	// if (!hasInternetConnection()) {
-	// return ResponseCode.NOT_OK;
-	// }
-	//
-	// // TODO: Implement the method
-	//
-	// return ResponseCode.NOT_OK;
-	// }
+//	 public void listCells() {
+//		if (!hasInternetConnection()) {
+//			return;
+//		}
+//	 }
 
 	/**
 	 * Check if the device can connect to the Internet
@@ -312,7 +283,9 @@ public class ServerRequest {
 	 * Cancels current server request
 	 */
 	public void cancel() {
-		if(requestTask != null) requestTask.cancel(true);
+		if(requestTask != null) {
+			requestTask.cancel(true);
+		}
 	}
 
 	/**
@@ -346,22 +319,22 @@ public class ServerRequest {
 					listOfCells);
 		}
 	}
-
+	
 	class RequestTask extends AsyncTask<String, Void, String> {
-
+		
 		// Class variables
 		private static final String TAG = "DownloadXmlTask";
 		private final int TIMEOUT_IN_MILLIS = 10000;
 		private String requestType = "";
-
+		
 		// Return values
 		private boolean state = false;
 		private List<Cell> listOfCells = new ArrayList<Cell>();
-
+		
 		private InputStream inputStream = null;
 		private InputStreamReader inputStreamReader = null;
 		private BufferedReader bufferedReader = null;
-
+		
 		// request download got cancelled
 		@Override
 		protected void onCancelled() {
@@ -377,7 +350,7 @@ public class ServerRequest {
 				Log.d(TAG, "Cancelled server request");
 			}
 		}
-
+		
 		@Override
 		protected String doInBackground(String... urls) {
 			try {
@@ -445,7 +418,7 @@ public class ServerRequest {
 
 		// When XML is fully loaded
 		@Override
-		protected void onPostExecute(String originalMethod) {
+		protected void onPostExecute(String xml) {
 			if (this.requestType.equals(ADD_CELL)) {
 				Log.d(TAG, "Callback to " + ADD_CELL
 						+ " method with status: " + this.state);
