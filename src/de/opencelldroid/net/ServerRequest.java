@@ -220,7 +220,10 @@ public class ServerRequest {
 		Log.d(TAG, "Get in area...\n" + "Internet connection OK\n"
 				+ "Test mode: " + DEBUG_MODE + "\n" + "URL: " + url);
 		
-		if (requestTask != null &&
+		if(requestTask == null){
+			requestTask = new RequestTask().execute(url, GET_IN_AREA);
+		}
+		else if (requestTask != null &&
 				(requestTask.getStatus() != AsyncTask.Status.PENDING || requestTask.getStatus() != AsyncTask.Status.RUNNING)) {
 			requestTask = new RequestTask().execute(url, GET_IN_AREA);
 		}
