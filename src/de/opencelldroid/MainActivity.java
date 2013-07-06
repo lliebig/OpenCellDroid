@@ -210,7 +210,7 @@ public class MainActivity extends Activity implements OnClickListener,
 	private void removeStatus(boolean enableButtons){
 		mBtnAddCell.setEnabled(enableButtons);
 		mBtnShowInArea.setEnabled(enableButtons);
-		mProgressLayout.setVisibility(View.GONE);
+		mProgressLayout.setVisibility(View.INVISIBLE);
 	}
 
 	// callbacks
@@ -249,7 +249,7 @@ public class MainActivity extends Activity implements OnClickListener,
 			public void run() {
 				mBtnAddCell.setEnabled(false);
 				mBtnShowInArea.setEnabled(false);
-				mBtnTryAgain.setVisibility(View.VISIBLE);
+				mBtnTryAgain.setVisibility(View.GONE);
 				removeStatus(false);
 				Toast.makeText(
 						MainActivity.this,

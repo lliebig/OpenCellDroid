@@ -12,9 +12,10 @@
     <!-- This Layout is not useless because it limits the width of the buttons to the width of the logo image view! -->
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_gravity="center">
+        android:layout_gravity="center"
+        android:gravity="center">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -22,7 +23,6 @@
             android:layout_gravity="center"
             android:adjustViewBounds="true"
             android:paddingBottom="20dp"
-            android:paddingTop="50dp"
             android:src="@drawable/logo" />
 
         <Button

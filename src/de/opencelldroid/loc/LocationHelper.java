@@ -172,7 +172,6 @@ public class LocationHelper {
 		if (mLocMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			
 			Location lastKnownLoc = mLocMan.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			if(lastKnownLoc == null) return null;
 			
 			if(gpsFixIsUpToDate(lastKnownLoc)) return lastKnownLoc;
 			else return null;
@@ -188,9 +187,9 @@ public class LocationHelper {
 	 * @return true if up do date, false if outdated
 	 */
 	public boolean gpsFixIsUpToDate(Location location){
+		if(location == null) return false;
 		
 		long now = System.currentTimeMillis();
-		
 		if((now - location.getTime()) < MAX_GPS_FIX_AGE) return true;
 		else return false;
 	}
