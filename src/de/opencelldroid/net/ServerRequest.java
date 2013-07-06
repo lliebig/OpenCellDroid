@@ -112,7 +112,10 @@ public class ServerRequest {
 		Log.d(TAG, "Add cell...\n" + "Internet connection OK\n" + "Test mode: "
 				+ DEBUG_MODE);
 		
-		if (requestTask != null &&
+		if(requestTask == null){
+			requestTask = new RequestTask().execute(url, ADD_CELL);
+		}
+		else if (requestTask != null &&
 				(requestTask.getStatus() != AsyncTask.Status.PENDING || requestTask.getStatus() != AsyncTask.Status.RUNNING)) {
 			requestTask = new RequestTask().execute(url, ADD_CELL);
 		}
