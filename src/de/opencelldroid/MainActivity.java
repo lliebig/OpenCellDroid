@@ -249,7 +249,7 @@ public class MainActivity extends Activity implements OnClickListener,
 			public void run() {
 				mBtnAddCell.setEnabled(false);
 				mBtnShowInArea.setEnabled(false);
-				mBtnTryAgain.setVisibility(View.GONE);
+				mBtnTryAgain.setVisibility(View.VISIBLE);
 				removeStatus(false);
 				Toast.makeText(
 						MainActivity.this,

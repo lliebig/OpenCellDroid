@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">OpenCellDroid</string>
-    <string name="action_settings">Settings</string>
+    <string name="menu_action_refresh_gps">Update position</string>
     
     <string name="button_submit_cell">Submit cell</string>
     <string name="button_show_cells">Show cells near me</string>
